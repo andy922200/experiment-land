@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Side Menu - HTML</title>
+    <style>
+        ul, li {
+            list-style-type: none;
+        }
+
+        li {
+            cursor: pointer;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .indent {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <ul id="sidebarMenu"></ul>
+
+    <script>
+        const temp = [
+                {
+                    key: '64f',
+                    text: '好喝黑糖',
+                    children: [
+                        {
+                            key: '445',
+                            text: '黑糖鮮奶',
+                            children: [
+                                {
+                                    key: '37a',
+                                    text: '黑糖珍珠鮮奶',
+                                },
+                                {
+                                    key: 'feb',
+                                    text: '黑糖芋圓鮮奶',
+                                },
+                                {
+                                    key: '59c',
+                                    text: '黑糖蒟蒻鮮奶',
+                                },
+                            ],
+                        },
+                        {
+                            key: '29e',
+                            text: '黑糖冬瓜',
+                            children: [
+                                {
+                                    key: 'ac3',
+                                    text: '黑糖冬瓜牛奶',
+                                },
+                                {
+                                    key: 'ca0',
+                                    text: '黑糖冬瓜珍珠',
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    key: '6c3',
+                    text: '茶',
+                    children: [
+                        {
+                            key: '5dc',
+                            text: '烏龍綠',
+                        },
+                        {
+                            key: 'b5f',
+                            text: '綠茶',
+                        },
+                        {
+                            key: 'b09',
+                            text: '紅茶',
+                        },
+                        {
+                            key: '887',
+                            text: '青茶',
+                        },
+                    ],
+                },
+                {
+                    key: 'c81',
+                    text: '咖啡',
+                    children: [
+                        {
+                            key: 'e02',
+                            text: '黑咖啡',
+                            children: [
+                                {
+                                    key: 'd20',
+                                    text: '濃縮咖啡',
+                                },
+                                {
+                                    key: '1f8',
+                                    text: '美式咖啡',
+                                },
+                            ],
+                        },
+                        {
+                            key: 'd7a',
+                            text: '牛奶咖啡',
+                            children: [
+                                {
+                                    key: 'c09',
+                                    text: '拿鐵',
+                                    children: [
+                                        {
+                                            key: 'db2',
+                                            text: '黑糖拿鐵',
+                                        },
+                                        {
+                                            key: '9f6',
+                                            text: '榛果拿鐵',
+                                        },
+                                        {
+                                            key: 'b61',
+                                            text: '香草拿鐵',
+                                        },
+                                    ],
+                                },
+                                {
+                                    key: '9ac',
+                                    text: '卡布奇諾',
+                                },
+                                {
+                                    key: 'ce8',
+                                    text: '摩卡',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ]
+        const menuData = generateMenu(temp);
+
+        function generateMenu(data) {
+                const stack = data.map(item => ({ item, level: 0, parentKey: null })); // 初始化堆疊並設定根層級為0，根節點沒有父節點
+                const menu = [];
+
+                while (stack.length > 0) {
+                    const { item, level, parentKey } = stack.pop();
+
+                    // 處理當前項目
+                    const menuItem = { key: item.key, text: item.text, level: level, parentKey: parentKey };
+                    menu.push(menuItem);
+
+                    // 如果有子節點，將其逆序添加到堆疊中，並增加層級，設定父節點
+                    if (item.children && item.children.length > 0) {
+                        for (let i = item.children.length - 1; i >= 0; i--) {
+                            stack.push({ item: item.children[i], level: level + 1, parentKey: item.key });
+                        }
+                    }
+                }
+
+                return menu;
+            }
+
+        function buildMenu(menuData) {
+            const ul = document.createElement('ul');
+
+            menuData.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.text;
+                li.style.paddingLeft = `${item.level * 20}px`; // Indent based on level
+                li.dataset.key = item.key;
+                li.dataset.level = item.level;
+                li.onclick = toggleSubMenu; // Attach click event for toggling
+
+                if (item.level > 0) {
+                    li.classList.add('hidden');
+                }
+
+                ul.appendChild(li);
+            });
+
+            return ul;
+        }
+
+        function toggleSubMenu(event) {
+            const clickedElement = event.currentTarget;
+            const level = parseInt(event.currentTarget.dataset.level);
+            let siblingElement = clickedElement.parentNode.firstChild; // 获取同层级的第一个元素
+            
+            // 遍历同层级的所有元素，将已展开的其他元素折叠
+            while (siblingElement) {
+                if (siblingElement !== clickedElement &&
+                    siblingElement.dataset.level === clickedElement.dataset.level &&
+                    !siblingElement.classList.contains('hidden')) {
+                    toggleChildren(siblingElement, true); // 折叠
+                }
+                siblingElement = siblingElement.nextElementSibling;
+            }
+
+             // 切换当前点击的元素的子菜单
+            toggleChildren(clickedElement, false);
+        }
+
+        function toggleChildren(element, hide) {
+            const level = parseInt(element.dataset.level);
+            let nextElement = element.nextElementSibling;
+
+            while (nextElement && parseInt(nextElement.dataset.level) > level) {
+                if (parseInt(nextElement.dataset.level) === level + 1) {
+                    if (hide) {
+                        nextElement.classList.add('hidden');
+                    } else {
+                        nextElement.classList.toggle('hidden');
+                    }
+                }
+
+                // 如果当前项是隐藏状态，则确保所有子孙菜单也是隐藏的
+                if (nextElement.classList.contains('hidden')) {
+                    hideAllChildren(nextElement);
+                }
+
+                nextElement = nextElement.nextElementSibling;
+            }
+        }
+
+        function hideAllChildren(element) {
+            const level = parseInt(element.dataset.level);
+            let nextElement = element.nextElementSibling;
+
+            while (nextElement && parseInt(nextElement.dataset.level) > level) {
+                nextElement.classList.add('hidden');
+                nextElement = nextElement.nextElementSibling;
+            }
+        }
+
+        document.getElementById('sidebarMenu').appendChild(buildMenu(menuData));
+    </script>
+</body>
+</html>

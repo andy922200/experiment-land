@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Side Menu - Vue3</title>
+    <style>
+        .sidebar-menu {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar-item {
+            cursor: pointer;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sidebar-item.selected {
+            background-color: blue;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <ul class="sidebar-menu">
+            <li v-for="item in menu" :key="item.key" :class="{ hidden: isHidden(item), 'sidebar-item': true, 'selected': isSelected(item) }"
+                @click="toggleItem(item)">
+                <span :style="{ paddingLeft: `${item.level * 20}px` }">{{ item.text }}</span>
+            </li>
+        </ul>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp, ref, onMounted } = Vue
+
+        createApp({
+            setup() {
+                const menu = ref([])
+                const openItems = ref(new Set())
+                const selectedItem = ref(new Set())
+
+                const temp = [
+                    {
+                        key: '64f',
+                        text: '好喝黑糖',
+                        children: [
+                            {
+                                key: '445',
+                                text: '黑糖鮮奶',
+                                children: [
+                                    {
+                                        key: '37a',
+                                        text: '黑糖珍珠鮮奶',
+                                    },
+                                    {
+                                        key: 'feb',
+                                        text: '黑糖芋圓鮮奶',
+                                    },
+                                    {
+                                        key: '59c',
+                                        text: '黑糖蒟蒻鮮奶',
+                                    },
+                                ],
+                            },
+                            {
+                                key: '29e',
+                                text: '黑糖冬瓜',
+                                children: [
+                                    {
+                                        key: 'ac3',
+                                        text: '黑糖冬瓜牛奶',
+                                    },
+                                    {
+                                        key: 'ca0',
+                                        text: '黑糖冬瓜珍珠',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        key: '6c3',
+                        text: '茶',
+                        children: [
+                            {
+                                key: '5dc',
+                                text: '烏龍綠',
+                            },
+                            {
+                                key: 'b5f',
+                                text: '綠茶',
+                            },
+                            {
+                                key: 'b09',
+                                text: '紅茶',
+                            },
+                            {
+                                key: '887',
+                                text: '青茶',
+                            },
+                        ],
+                    },
+                    {
+                        key: 'c81',
+                        text: '咖啡',
+                        children: [
+                            {
+                                key: 'e02',
+                                text: '黑咖啡',
+                                children: [
+                                    {
+                                        key: 'd20',
+                                        text: '濃縮咖啡',
+                                    },
+                                    {
+                                        key: '1f8',
+                                        text: '美式咖啡',
+                                    },
+                                ],
+                            },
+                            {
+                                key: 'd7a',
+                                text: '牛奶咖啡',
+                                children: [
+                                    {
+                                        key: 'c09',
+                                        text: '拿鐵',
+                                        children: [
+                                            {
+                                                key: 'db2',
+                                                text: '黑糖拿鐵',
+                                            },
+                                            {
+                                                key: '9f6',
+                                                text: '榛果拿鐵',
+                                            },
+                                            {
+                                                key: 'b61',
+                                                text: '香草拿鐵',
+                                            },
+                                        ],
+                                    },
+                                    {
+                                        key: '9ac',
+                                        text: '卡布奇諾',
+                                    },
+                                    {
+                                        key: 'ce8',
+                                        text: '摩卡',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ]
+                const generateMenu = (data) => {
+                    const stack = data.map(item => ({ item, level: 0, parentKey: null })); // 初始化堆疊並設定根層級為0，根節點沒有父節點
+                    const menu = [];
+
+                    while (stack.length > 0) {
+                        const { item, level, parentKey } = stack.pop();
+
+                        // 處理當前項目
+                        const menuItem = { key: item.key, text: item.text, level: level, parentKey: parentKey };
+                        menu.push(menuItem);
+
+                        // 如果有子節點，將其逆序添加到堆疊中，並增加層級，設定父節點
+                        if (item.children && item.children.length > 0) {
+                            for (let i = item.children.length - 1; i >= 0; i--) {
+                                stack.push({ item: item.children[i], level: level + 1, parentKey: item.key });
+                            }
+                        }
+                    }
+
+                    return menu;
+                }
+
+                const toggleItem = (item) => {
+                    selectedItem.value.clear()
+                    selectedItem.value.add(item.key)
+                    markParentItems(item.parentKey)
+
+                    if (item.level === 0) {
+                        // 如果点击的是 level 0 的项，则关闭其他所有打开的 level 0 项
+                        menu.value
+                            .filter(i => i.level === 0 && i.key !== item.key)
+                            .forEach(i => {
+                                openItems.value.delete(i.key);
+                                closeChildren(i.key);
+                            });
+                    }else if(item.level > 0) {
+                        // 如果点击的是当前层级的其他项，先关闭它们
+                        menu.value
+                            .filter(i => i.level === item.level && i.parentKey === item.parentKey && i.key !== item.key)
+                            .forEach(i => openItems.value.delete(i.key));
+                    }
+
+                    // 切换当前点击项
+                    if (openItems.value.has(item.key)) {
+                        openItems.value.delete(item.key);
+                        // 关闭所有子项
+                        closeChildren(item.key);
+                    } else {
+                        openItems.value.add(item.key);
+                    }
+
+                    localStorage.setItem('openItems', JSON.stringify(Array.from(openItems.value)));
+                    localStorage.setItem('selectedItem', JSON.stringify(Array.from(selectedItem.value)));
+                }
+
+                const markParentItems = (key) => {
+                    if(key){
+                        selectedItem.value.add(key);
+                        const parentItem = menu.value.find(item => item.key === key);
+                        if (parentItem) {
+                            markParentItems(parentItem.parentKey);
+                        }
+                    }
+                }
+
+                const closeChildren = (parentKey) => {
+                    const children = menu.value.filter(item => item.parentKey === parentKey);
+                    children.forEach(child => {
+                        openItems.value.delete(child.key);
+                        closeChildren(child.key);
+                    });
+                }
+
+                const isHidden = (item) => {
+                    return item.level !== 0 && !openItems.value.has(item.parentKey)
+                }
+
+                const isSelected = (item) => {
+                    return selectedItem.value.has(item.key)
+                }
+
+                onMounted(() => {
+                    const openItemsFromStorage = JSON.parse(localStorage.getItem('openItems'));
+                    if (openItemsFromStorage) {
+                        openItems.value = new Set(openItemsFromStorage)
+                    }
+                    const selectedItemFromStorage = JSON.parse(localStorage.getItem('selectedItem'));
+                    if (selectedItemFromStorage) {
+                        selectedItem.value = new Set(selectedItemFromStorage)
+                    }
+
+                    menu.value = generateMenu(temp);
+                })
+
+                return {
+                    menu,
+                    openItems,
+                    isHidden,
+                    isSelected,
+                    toggleItem,
+                    selectedItem
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>
