@@ -1,0 +1,112 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* custom reset css start*/
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+/* custom reset css end*/
+body {
+	background-color: #dddddd;
+}
+
+.wrapper {
+	margin: 0 auto;
+	width: 100%;
+}
+
+.general__div {
+	position: relative;
+    margin: 20px auto;
+    padding: 10px 15px;
+    color: #fff;
+    border: 1px solid #000;
+	border-radius: 4px;
+	width: 600px;
+	font-size: 16px;
+}
+
+.general__div--blue {
+    background-color: #0e4d90;
+    border-color: #0e4d90;
+}
+.general__div--green {
+    background-color: #53b22b;
+    border-color: #53b22b;
+}
+.general__div--orange {
+    background-color: #ff9900;
+    border-color: #ff9900;
+}
+
+.word{
+	background-color: #fff;
+	border-color: #fff;
+	color: #000;
+}
+
+.word::before {
+    content:'';
+	width: 0;
+	height: 0;
+	border-width: 0 10px 10px;
+	border-style: solid;
+	border-color: transparent transparent #fff;
+	position: absolute;
+	left: 10px;
+	top: -10px;
+}
