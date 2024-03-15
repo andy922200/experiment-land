@@ -16,54 +16,122 @@
 
     <div class="header">
         <div class="container">
-            <div class="navbar">
-                <div class="navbar__logo">HOTEL</div>
-                <ul>
-                    <li class="navbar__link"><a href="#">About</a></li>
-                    <li class="navbar__link"><a href="#">Service</a></li>
-                    <li class="navbar__link"><a href="#">Rooms</a></li>
-                    <li class="navbar__link"><a href="#">Blog</a></li>
-                    <li class="navbar__link"><a href="#">Contact</a></li>
-                </ul>
-                <button class="sign-up-btn">SIGN UP</button>
-            </div>
-            <div class="hotel-info__wrapper">
-                <h1 class="hotel-info__title">
-                    <span>Exclusive</span>
-                    <span>Boutique</span>
-                    <span>Hotel</span>
-                </h1>
-                <p class="hotel-info__subtitle">Luxury Boutique Hotel</p>
-                <div class="hotel-info__social-icons">
-                    <a href="#" class="hotel-info__social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="hotel-info__social-icon"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#" class="hotel-info__social-icon"><i class="fa-brands fa-instagram"></i></a>
+            <div class="wrapper">
+                <div class="navbar">
+                    <div class="navbar__logo">HOTEL</div>
+                    <ul>
+                        <li class="navbar__link"><a href="#">About</a></li>
+                        <li class="navbar__link"><a href="#">Service</a></li>
+                        <li class="navbar__link"><a href="#">Rooms</a></li>
+                        <li class="navbar__link"><a href="#">Blog</a></li>
+                        <li class="navbar__link"><a href="#">Contact</a></li>
+                    </ul>
+                    
+                    <div style="display: flex;flex-wrap: wrap;align-items: center;">
+                        <button class="sign-up-btn">SIGN UP</button>
+                        <div class="burger__wrapper">
+                            <label for="burger">☰</label>
+                            <input type="checkbox" id="burger" style="display:none;">
+                            <ul>
+                                <li class="navbar__link"><a href="#">About</a></li>
+                                <li class="navbar__link"><a href="#">Service</a></li>
+                                <li class="navbar__link"><a href="#">Rooms</a></li>
+                                <li class="navbar__link"><a href="#">Blog</a></li>
+                                <li class="navbar__link"><a href="#">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="hotel-search__wrapper">
-                <div class="hotel-search">
-                    <div>
-                        <label for="arrival">ARRIVAL</label>
-                        <input type="date" id="arrival">
+                <div class="hotel-info__wrapper">
+                    <h1 class="hotel-info__title">
+                        <span>Exclusive</span>
+                        <span>Boutique</span>
+                        <span>Hotel</span>
+                    </h1>
+                    <p class="hotel-info__subtitle">Luxury Boutique Hotel</p>
+                    <div class="hotel-info__social-icons">
+                        <a href="#" class="hotel-info__social-icon"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="hotel-info__social-icon"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="hotel-info__social-icon"><i class="fa-brands fa-instagram"></i></a>
                     </div>
-                    <div>
-                        <label for="departure">DEPARTURE</label>
-                        <input type="date" id="departure">
+                </div>
+                <div class="hotel-search__wrapper">
+                    <div class="hotel-search">
+                        <div class="date-select arrival">
+                            <div class="date-select__wrapper">
+                                <label for="arrival">ARRIVAL</label>
+                                <input type="date" id="arrival-input" class="date-select__input" style="display:none;">
+                                <div class="date-select__info date-select__flex">
+                                    <span class="date-select__date">18</span>
+                                    <div class="date-select__flex">
+                                        <span class="date-select__month">
+                                            Oct, 2019
+                                            <button id="arrival-btn" class="date-select__trigger-btn">v</button>
+                                        </span>
+                                        <span class="date-select__day">Friday</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="date-select departure">
+                            <div class="date-select__wrapper">
+                                <label for="departure">DEPARTURE</label>
+                                <input type="date" id="departure-input" class="date-select__input" style="display:none;">
+                                <div class="date-select__info date-select__flex">
+                                    <span class="date-select__date">19</span>
+                                    <div class="date-select__flex">
+                                        <span class="date-select__month">
+                                            Oct, 2019
+                                            <button id="departure-btn" class="date-select__trigger-btn">v</button>
+                                        </span>
+                                        <span class="date-select__day">Saturday</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div id="adults" class="count-select">
+                            <p class="count-select__label">ADULTS</p>
+                            <div class="count-select__flex count-select__flex--center">
+                                <span class="count-select__minus"> - </span>
+                                <span class="count-select__number">2</span>
+                                <span class="count-select__plus"> + </span>
+                            </div>
+                        </div>
+                
+                        <div id="children" class="count-select">
+                            <p class="count-select__label">Children</p>
+                            <div class="count-select__flex count-select__flex--center">
+                                <span class="count-select__minus"> - </span>
+                                <span class="count-select__number">0</span>
+                                <span class="count-select__plus"> + </span>
+                            </div>
+                        </div>
+                
+                        <div class="check-availability__wrapper">
+                            <button id="check-availability">CHECK AVAILABILITY</button>
+                        </div>
+
+                        <div class="extend-icon__wrapper">
+                            <div id="extend-icon"></div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="adults">ADULTS</label>
-                        <input type="number" id="adults" value="2">
-                    </div>
-                    <div>
-                        <label for="children">CHILDREN</label>
-                        <input type="number" id="children" value="0">
-                    </div>
-                    <button>CHECK AVAILABILITY</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="main">
+        <div class="container">
+            <div class="wrapper">
+                <h3>Luxury Plaza Hotel for You</h3>
+                <p>Distant orb has power to raise and purify our thoughts like a strain of sacred music.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="./source/fubon.js"></script>
 </body>
 
 </html>
