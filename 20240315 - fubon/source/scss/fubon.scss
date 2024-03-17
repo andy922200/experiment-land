@@ -330,3 +330,100 @@
         }
     }
 }
+
+// footer area
+.footer{
+    background-color: $color-blue-dark;
+    padding: 4.75rem 0 5rem 0;
+
+    @include tablet {
+        padding: 3rem 0;
+    }
+
+    @include desktop {
+        padding: 5.875rem 0;
+    }
+
+    &__wrapper {
+        @include tablet {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+    }
+
+    &__half:nth-child(1) {
+        @include tablet {
+            width: 75%;
+        }
+    }
+
+    &__half:nth-child(2) {
+        @include tablet {
+            width: 25%;
+            padding-right: 0.625rem;
+        }
+    }
+
+    &__title{
+        margin: 0 0 1.125rem 0;
+        font-size: 3.5rem;
+        line-height: 3rem;
+        color: $color-white;
+
+        @include desktop {
+            margin-bottom: 2.75rem;
+        }
+    }
+
+    &__infos{
+        @include desktop{
+            display: flex;
+            flex-wrap: wrap;
+        }
+    }
+
+    &__info{
+        font-size: 1.125rem;
+        color: $color-white;
+        margin-bottom: 1rem;
+
+        i,img{
+          margin-right: 1rem;  
+        }
+
+        &--light{
+            color: $color-white-transparent-49;
+        }
+
+        @include desktop {
+            margin-right: 1.875rem;
+        }
+    }
+
+    &__subscribe{
+        margin: 4rem 0 1.5rem 0;
+        font-size: 1.5rem;
+        line-height: 2rem;
+        color: $color-white;
+
+        @include tablet {
+            margin-top: 0;
+        }
+
+        @include desktop {
+            margin-bottom: 1.125rem;
+        }
+    }
+
+    &__email-input{
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.125rem;
+        width: 100%;
+    }
+
+    &__extra{
+        color: $color-white-transparent-49;
+        font-size: 0.875rem;
+    }
+}
