@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue 3 Todo List with Axios and JSON Placeholder</title>
+    <link rel="stylesheet" href="./custom-css-reset.css">
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+</head>
+
+<body class="p-4 font-sans bg-gray-100 text-gray-900">
+    <div id="app" class="max-w-xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Todo List</h1>
+
+        <h3 class="text-xl my-2 text-center">Form</h3>
+        <div class="mb-4">
+            <input v-model="newTodo.title" placeholder="Add a new todo"
+                class="w-full p-2 border border-gray-300 rounded mb-2">
+            <div v-if="errorMsg" class="text-red-500 mb-2 text-sm">{{ errorMsg }}</div>
+            <select v-model="newTodo.completed" class="w-full p-2 border border-gray-300 rounded mb-2">
+                <option value="false">Not Completed</option>
+                <option value="true">Completed</option>
+            </select>
+            <button @click="handleSubmit"
+                class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">{{ !editMode ? 'Add' : 'Update'}} Todo</button>
+        </div>
+
+        <h3 class="text-xl my-2 text-center">List</h3>
+        <ul>
+            <li v-for="(todo, index) in todos" :key="todo.id" class="flex items-center justify-between mb-2">
+                <span class="flex-1 mr-4" :class="{'line-through': todo.completed}">{{ todo.title }}</span>
+                <button @click="editTodo(todo)"
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2">Edit</button>
+                <button @click="deleteTodo(todo.id, index)"
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const newTodo = ref({ title: '', completed: 'false' });
+                const todos = ref([]);
+                const editMode = ref(false);
+                const editingTodoId = ref(null);
+                const errorMsg = ref('');
+                const apiDomain = 'https://jsonplaceholder.typicode.com';
+
+                const loadTodos = async () => {
+                    try{
+                        const { data } = await axios.get(`${apiDomain}/todos?_limit=5`)
+                        todos.value = data;
+                    }catch(e){
+                        console.log(e)
+                    }
+                };
+
+                const addTodo = async() => {
+                    try{
+                        if (!newTodo.value.title.trim()) {
+                            errorMsg.value = 'Title cannot be empty!';
+                            return;
+                        }
+
+                        const { data } = await axios.post(`${apiDomain}/todos`, {
+                            title: newTodo.value.title,
+                            completed: newTodo.value.completed === 'true'
+                        })
+                        todos.value.push(data);
+                        
+                        resetTodoForm();
+                    }catch(e){
+                        console.log(e)
+                    }
+                };
+
+                const editTodo = (todo) => {
+                    newTodo.value.title = todo.title;
+                    newTodo.value.completed = todo.completed.toString();
+                    editingTodoId.value = todo.id;
+                    editMode.value = true;
+                    errorMsg.value = '';
+                };
+
+                const resetTodoForm = () => {
+                    newTodo.value.title = '';
+                    newTodo.value.completed = 'false';
+                    editMode.value = false;
+                    editingTodoId.value = null;
+                    errorMsg.value = '';
+                };
+
+                const updateTodo = async() => {
+                    try{
+                        if (editingTodoId.value !== null) {
+                            const { data } = await axios.patch(`${apiDomain}/todos/${editingTodoId.value}`, {
+                                title: newTodo.value.title,
+                                completed: newTodo.value.completed === 'true'
+                            })
+
+                            const index = todos.value.findIndex(todo => todo.id === editingTodoId.value);
+
+                            if(index > -1){
+                                todos.value[index] = { ...todos.value[index], ...data };
+                                resetTodoForm()
+                            }
+                        }
+                    }catch(e){
+                        console.log(e)
+                    }
+                };
+
+                const deleteTodo = async(id, index) => {
+                    try{
+                        await axios.delete(`${apiDomain}/todos/${id}`)
+                        todos.value.splice(index, 1);
+                    }catch(e){
+                        console.log(e)
+                    }
+                };
+
+                const handleSubmit = ()=>{
+                    editMode.value ? updateTodo() : addTodo()
+                }
+
+                // initial load
+                loadTodos();
+
+                return { editMode, errorMsg, newTodo, todos, addTodo, editTodo, updateTodo, deleteTodo, handleSubmit };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+
+</html>
