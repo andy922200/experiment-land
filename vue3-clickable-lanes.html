@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta viewport="width=device-width, initial-scale=1.0">
+    <title>Vue 3 Clickable Lanes</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="flex justify-center">
+            <div class="overflow-auto" style="width: 900px;">
+                <div class="flex-wrap">
+                    <div class="flex">
+                        <div v-for="(block, index) in floorsData['1F'].sections" :key="`1F-block-${index}`" class="m-0.5">
+                            <div 
+                                class="h-6 rounded text-center" 
+                                :class="`${block.category === 'WG24010002' ? 'text-black' : 'text-white'}`" 
+                                :style="{
+                                width: `${block.count * 24 + (block.count-1)*4}px`,
+                                backgroundColor: getColor(block.category),
+                            }">
+                                {{ getText(block.category) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex">
+                        <div v-for="i in floorsData['1F'].itemNumberList" :key="`1F-${i}`" class="m-0.5">
+                            <label :for="`1F-${i}`"
+                                :class="['w-6 h-20 bg-green-200 cursor-pointer rounded flex items-center justify-center ring-2', {'ring-blue': selectedLane === `1F-${i}`, 'ring-transparent': selectedLane !== `1F-${i}`}]"
+                                @click="selectLane(`1F-${i}`)">
+                                <span class="text-black">{{ `${i}` }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div 
+                        class="ml-0.5 mr-1.5 my-0.5 h-6 rounded text-center border border-black" 
+                        :style="{
+                        width: `${floorsData['1F'].itemNumberList.length * 24 + (floorsData['1F'].itemNumberList.length-1)*4}px`
+                    }">
+                        1F
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <div class="overflow-auto" style="width: 900px;">
+                <div class="flex-wrap">
+                    <div class="flex">
+                        <div v-for="(block, index) in floorsData['2F'].sections" :key="`2f-block-${index}`" class="m-0.5">
+                            <div class="h-6 rounded text-center"
+                                :class="`${block.category === 'WG24010002' ? 'text-black' : 'text-white'}`" 
+                                :style="{
+                                width: `${block.count * 24 + (block.count-1)*4}px`,
+                                backgroundColor: getColor(block.category),
+                            }">
+                                {{ getText(block.category) }}
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="flex">
+                        <div v-for="i in floorsData['2F'].itemNumberList" :key="`2F-${i+32}`" class="m-0.5">
+                            <label :for="`2F-${i}`"
+                                :class="['w-6 h-20 bg-green-200 cursor-pointer rounded flex items-center justify-center ring-2', {'ring-blue': selectedLane === `2F-${i}`, 'ring-transparent': selectedLane !== `2F-${i}`}]"
+                                @click="selectLane(`2F-${i}`)">
+                                <span class="text-black">{{ i }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div 
+                        class="ml-0.5 mr-1.5 my-0.5 h-6 rounded text-center border border-black"
+                        :style="{
+                            width: `${floorsData['2F'].itemNumberList.length * 24 + (floorsData['2F'].itemNumberList.length-1)*4}px`
+                        }"
+                    >
+                        2F
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const rawData = ref({
+                    "2F": [
+                        {
+                            "value": "33",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "34",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "35",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "36",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "37",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "38",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "39",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "40",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "41",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "42",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "43",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "44",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "45",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "46",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "47",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "48",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "49",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "50",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "51",
+                            "category": "WG24010003"
+                        },
+                        {
+                            "value": "52",
+                            "category": "WG24010003"
+                        },
+                        {
+                            "value": "53",
+                            "category": "WG24010003"
+                        },
+                        {
+                            "value": "54",
+                            "category": "WG24010003"
+                        },
+                        {
+                            "value": "55",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "56",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "57",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "58",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "59",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "60",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "61",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "62",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "63",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "64",
+                            "category": "WG24010001"
+                        }
+                    ],
+                    "1F": [
+                        {
+                            "value": "1",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "2",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "3",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "4",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "5",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "6",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "7",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "8",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "9",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "10",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "11",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "12",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "13",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "14",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "15",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "16",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "17",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "18",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "19",
+                            "category": "WG24010002"
+                        },
+                        {
+                            "value": "20",
+                            "category": "WG24010003"
+                        },
+                        {
+                            "value": "21",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "22",
+                            "category": "WG24010003"
+                        },
+                        {
+                            "value": "23",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "24",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "25",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "26",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "27",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "28",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "29",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "30",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "31",
+                            "category": "WG24010001"
+                        },
+                        {
+                            "value": "32",
+                            "category": "WG24010001"
+                        }
+                    ],
+                })
+
+                function transformDataWithSections(originalData) {
+                    const transformed = {};
+
+                    for(let [_, content] of Object.entries(originalData.value)) {
+                        content = content.sort((a, b) => parseInt(a.value) - parseInt(b.value));
+                    }
+
+                    // 樓層遍歷
+                    for (const floor in originalData.value) {
+                        const floorData = originalData.value[floor];
+                        let sections = [];
+                        let itemNumberList = [];
+                        let currentSection = null;
+
+                        // 編號遍歷
+                        for (const item of floorData) {
+                            const value = parseInt(item.value);
+                            itemNumberList.push(value)
+
+                            // 如果當前區段不存在 || 當前編號不連續 || 當前編號的類別與區段的類別不同，新建一個區段 
+                            if (!currentSection || currentSection.end + 1 !== value || currentSection.category !== item.category) {
+                                // 確保上一個區段被推入區段列表
+                                if (currentSection) {
+                                    sections.push(currentSection);
+                                }
+                                // 新建一個區段
+                                currentSection = { start: value, end: value, count: 1, category: item.category };
+                            } else {
+                                // 當前編號連續，將當前編號加入區段
+                                currentSection.end = value;
+                                currentSection.count += 1;
+                            }
+                        }
+
+                        // 確保最後一個區段被推入區段列表
+                        if (currentSection) {
+                            sections.push(currentSection);
+                        }
+
+                        // 將區段列表與編號列表推入樓層列表
+                        transformed[floor] = {
+                            sections,
+                            itemNumberList
+                        };
+                    }
+
+                    return transformed;
+                }
+
+
+                const floorsData = transformDataWithSections(rawData);
+                const selectedLane = ref('');
+
+                const selectLane = (lane) => {
+                    selectedLane.value = lane;
+                };
+
+                function getColor(category) {
+                    const colorMap = {
+                        'WG24010001': '#000',
+                        'WG24010002': '#B7DAFE',
+                        'WG24010003': '#2D8AF9',
+                    }
+                    return colorMap[category] || 'black';
+                }
+
+                function getText(category) {
+                    const textMap = {
+                        'WG24010001': '練習球道',
+                        'WG24010002': '娛樂球道',
+                        'WG24010003': '商務球道',
+                    }
+                    return textMap[category] || '球道';
+                }
+
+
+                return {
+                    floorsData,
+                    getColor,
+                    getText,
+                    selectedLane,
+                    selectLane,
+                    rawData
+                };
+            },
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
