@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Device Sync Example with Toggle Behavior</title>
+    <style>
+        #module-1 .box {
+            width: 100px;
+            height: 50px;
+            margin: 5px;
+            display: inline-block;
+            background-color: #f0f0f0;
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        #module-1 .boxContainer {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.5s ease;
+        }
+        #module-1 .disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #module-1 .selected {
+            background-color: #4caf50;
+        }
+        #module-1 .boxContainer.expanded {
+            height: 200px;
+            overflow-y: auto;
+        }
+        #module-1 .hidden {
+            display: none;
+        }
+        #module-1 .visible {
+            display: inline;
+        }
+        #module-1 .control-panel {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #module-2 .box {
+            width: 100px;
+            height: 50px;
+            margin: 5px;
+            display: inline-block;
+            background-color: #f0f0f0;
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        #module-2 .boxContainer {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.5s ease;
+        }
+        #module-2 .disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #module-2 .selected {
+            background-color: #4caf50;
+        }
+        #module-2 .boxContainer.expanded {
+            height: 200px;
+            overflow-y: auto;
+        }
+        #module-2 .hidden {
+            display: none;
+        }
+        #module-2 .visible {
+            display: inline;
+        }
+        #module-2 .control-panel {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #module-1__savedStatus,
+        #module-2__savedStatus{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="module-1">
+        <div class="control-panel">
+            <div style="width: 130px;">
+                <label for="module-1__syncToggle">同步相關設備</label>
+                <input type="checkbox" id="module-1__syncToggle">
+            </div>
+            <div style="display: flex; justify-content: space-between; flex-grow: 1;">
+                <button id="module-1__saveButton" class="hidden">儲存</button>
+                <button id="module-1__editButton" class="hidden" data-state="edit">編輯</button>
+            </div>
+        </div>
+        <div id="module-1__savedStatus" class="hidden"></div>
+        <div class="boxContainer">
+        </div>
+    </div>
+
+    <div id="module-2" style="margin: 24px 0;">
+        <div class="control-panel">
+            <div style="width: 130px;">
+                <label for="module-2__syncToggle">同步相關場地</label>
+                <input type="checkbox" id="module-2__syncToggle">
+            </div>
+            <div style="display: flex; justify-content: space-between; flex-grow: 1;">
+                <button id="module-2__saveButton" class="hidden">儲存</button>
+                <button id="module-2__editButton" class="hidden" data-state="edit">編輯</button>
+            </div>
+        </div>
+        <div id="module-2__savedStatus" class="hidden"></div>
+        <div class="boxContainer">
+        </div>
+    </div>
+    
+    
+    <script>
+        const state = {
+            selectedBoxes: [],
+            selectedPlaces: []
+        }
+        const moduleSelectorList = [
+            { id: 'module-1', savedKey: 'selectedBoxes', start: 1, end: 20 }, 
+            { id: 'module-2', savedKey: 'selectedPlaces', start: 500, end: 520 }
+        ];
+
+        function initModule({ id, savedKey }) {
+            const container = document.getElementById(id);
+            const syncToggle = container.querySelector(`#${id}__syncToggle`);
+            const saveButton = container.querySelector(`#${id}__saveButton`);
+            const editButton = container.querySelector(`#${id}__editButton`);
+            const boxContainer = container.querySelector(`.boxContainer`);
+
+            syncToggle.addEventListener('change', () => {
+                handleToggleChange(syncToggle.checked, { id, savedKey });
+            });
+
+            saveButton.addEventListener('click', () => {
+                handleSave({ id, savedKey });
+            });
+
+            editButton.addEventListener('click', () => {
+                handleEdit({ id, savedKey });
+            });
+        }
+
+        function handleToggleChange(isChecked, { id, savedKey }) {
+            if (isChecked) {
+                triggerExpand(true, {id, savedKey});
+                toggleVisibility(`#${id}__saveButton`, true);
+                toggleVisibility(`#${id}__editButton`, false);
+
+                moduleSelectorList.forEach(otherModule => {
+                    if (otherModule.id !== id) {
+                        const otherBoxContainer = document.getElementById(otherModule.id).querySelector('.boxContainer');
+                        
+                        if (otherBoxContainer.classList.contains('expanded')) {
+                            triggerExpand(false, {id: otherModule.id, savedKey: otherModule.savedKey});
+                            toggleVisibility(`#${otherModule.id}__saveButton`, false);
+                            if (state[otherModule.savedKey].length === 0) {
+                                document.getElementById(otherModule.id).querySelector('input[type="checkbox"]').checked = false;
+                            }
+                        }
+                    }
+                });
+            } else {
+                state[savedKey] = [];
+                triggerExpand(false, { id, savedKey });
+                toggleVisibility(`#${id}__saveButton`, false);
+                toggleVisibility(`#${id}__editButton`, false);
+            }
+        }
+
+        function handleSave({ id, savedKey }) {
+            const container = document.getElementById(id);
+            const boxContainer = container.querySelector('.boxContainer');
+            const selectedBoxes = boxContainer.querySelectorAll('.box.selected');
+            state[savedKey] = Array.from(selectedBoxes, box => ({ id: parseInt(box.getAttribute('data-id')) }));
+            if (state[savedKey].length === 0) {
+                container.querySelector('input[type="checkbox"]').checked = false;
+            }
+            triggerExpand(false, { id, savedKey });
+            toggleVisibility(`#${id}__editButton`, true);
+            toggleVisibility(`#${id}__saveButton`, false);
+        }
+
+        function handleEdit({ id, savedKey }) {
+            const container = document.getElementById(id);
+            const editButton = container.querySelector(`#${id}__editButton`);
+            const currentState = editButton.getAttribute('data-state');
+
+            if (editButton.textContent === '編輯') {
+                triggerExpand(true, { id, savedKey });
+                toggleVisibility(`#${id}__saveButton`, true);
+
+                moduleSelectorList.forEach(otherModule => {
+                    if (otherModule.id !== id) {
+                        const otherBoxContainer = document.getElementById(otherModule.id).querySelector('.boxContainer');
+                        if (otherBoxContainer.classList.contains('expanded')) {
+                            triggerExpand(false, {id: otherModule.id, savedKey: otherModule.savedKey });
+                            toggleVisibility(`#${otherModule.id}__editButton`, state[otherModule.savedKey].length !== 0);
+                            toggleVisibility(`#${otherModule.id}__saveButton`, false);
+                            if (state[otherModule.savedKey].length === 0) {
+                                document.getElementById(otherModule.id).querySelector('input[type="checkbox"]').checked = false;
+                            }
+                        }
+                    }
+                });
+
+                editButton.setAttribute('data-state', 'restore');
+                editButton.textContent = '回復';
+            } else {
+                triggerExpand(false, { id, savedKey });
+                toggleVisibility(`#${id}__editButton`, true);
+                toggleVisibility(`#${id}__saveButton`, false);
+
+                editButton.setAttribute('data-state', 'edit');
+                editButton.textContent = '編輯';
+            }
+        }
+ 
+        function createBoxes({ id, start, end }) {
+            const boxContainer = document.getElementById(id).querySelector('.boxContainer');
+            for (let i = start; i <= end; i++) {
+                const box = document.createElement('div');
+                box.className = 'box clickable';
+                box.textContent = `Item ${i}`;
+                box.setAttribute('data-id', i.toString());
+                boxContainer.appendChild(box);
+            }
+        }
+
+        function applyBoxStates({ id, savedKey }) {
+            const boxContainer = document.getElementById(id).querySelector('.boxContainer');
+            const boxes = boxContainer.querySelectorAll('.box');
+            boxes.forEach(box => {
+                const boxId = parseInt(box.getAttribute('data-id'));
+                box.classList.remove('selected', 'disabled', 'clickable');
+                box.classList.add('clickable');
+
+                if (state[savedKey].some(item => item.id === boxId)) {
+                    box.classList.add('selected');
+                } else if (boxId % 5 === 0) {
+                    box.classList.add('disabled');
+                    box.onclick = null;
+                } else {
+                    box.onclick = toggleBox;
+                }
+            });
+        }
+
+        function toggleBox() {
+            if (!this.classList.contains('disabled')) {
+                this.classList.toggle('selected');
+            }
+        }
+
+        function displaySavedStatus(status = true, { id, savedKey }) {
+            const container = document.getElementById(id);
+            const savedStatus = container.querySelector(`#${id}__savedStatus`);
+            if (!savedKey || !state[savedKey]) return;
+
+            if (state[savedKey].length === 0) {
+                savedStatus.classList.add('hidden');
+                savedStatus.textContent = "";
+            } else {
+                savedStatus.classList.remove('hidden');
+                savedStatus.textContent = `${savedKey}: ${state[savedKey].map(box => box.id).join(', ')}`;
+            }
+        }
+
+        function triggerExpand(status = true, { id, savedKey }){
+            const container = document.getElementById(id);
+            const boxContainer = container.querySelector('.boxContainer');
+            const editButton = container.querySelector(`#${id}__editButton`);
+            if (status) {
+                boxContainer.classList.add('expanded');
+                editButton.textContent = '回復';
+                applyBoxStates({id, savedKey });
+            } else {
+                boxContainer.classList.remove('expanded');
+                applyBoxStates({ id, savedKey });
+                displaySavedStatus(true, { id, savedKey });
+                editButton.textContent = '編輯';
+            }
+        }
+
+        function toggleVisibility(selector, isVisible) {
+            const element = document.querySelector(selector);
+            if (isVisible) {
+                element.classList.remove('hidden');
+                element.classList.add('visible');
+            } else {
+                element.classList.remove('visible');
+                element.classList.add('hidden');
+            }
+        }
+
+        moduleSelectorList.forEach((item) => {
+            initModule(item);
+            createBoxes(item);
+            applyBoxStates(item);
+        });
+    </script>
+</body>
+
+</html>
