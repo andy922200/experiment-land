@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js"></script>
+    <style>
+        .clickable-div {
+            width: 100px;
+            height: 50px;
+            margin: 5px;
+            background-color: #f0f0f0;
+            display: inline-block;
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .clickable-div:not(.disabled):hover{
+            background-color: blue;
+            color: white;
+        }
+
+        .active {
+            background-color: #4CAF50;
+        }
+
+        .disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            color: #666666;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- 手動添加方框 -->
+        <div class="clickable-div" id="time-0000">00:00</div>
+        <div class="clickable-div" id="time-0030">00:30</div>
+        <div class="clickable-div" id="time-0100">01:00</div>
+        <div class="clickable-div" id="time-0130">01:30</div>
+        <div class="clickable-div" id="time-0200">02:00</div>
+        <div class="clickable-div" id="time-0230">02:30</div>
+        <div class="clickable-div" id="time-0300">03:00</div>
+        <div class="clickable-div" id="time-0330">03:30</div>
+        <div class="clickable-div" id="time-0400">04:00</div>
+        <div class="clickable-div" id="time-0430">04:30</div>
+        <div class="clickable-div" id="time-0500">05:00</div>
+        <div class="clickable-div" id="time-0530">05:30</div>
+        <div class="clickable-div" id="time-0600">06:00</div>
+        <div class="clickable-div" id="time-0630">06:30</div>
+        <div class="clickable-div" id="time-0700">07:00</div>
+        <div class="clickable-div" id="time-0730">07:30</div>
+        <div class="clickable-div" id="time-0800">08:00</div>
+        <div class="clickable-div" id="time-0830">08:30</div>
+        <div class="clickable-div" id="time-0900">09:00</div>
+        <div class="clickable-div" id="time-0930">09:30</div>
+        <div class="clickable-div" id="time-1000">10:00</div>
+        <div class="clickable-div" id="time-1030">10:30</div>
+        <div class="clickable-div" id="time-1100">11:00</div>
+        <div class="clickable-div" id="time-1130">11:30</div>
+        <div class="clickable-div" id="time-1200">12:00</div>
+        <div class="clickable-div" id="time-1230">12:30</div>
+        <div class="clickable-div" id="time-1300">13:00</div>
+        <div class="clickable-div" id="time-1330">13:30</div>
+        <div class="clickable-div" id="time-1400">14:00</div>
+        <div class="clickable-div" id="time-1430">14:30</div>
+        <div class="clickable-div" id="time-1500">15:00</div>
+        <div class="clickable-div" id="time-1530">15:30</div>
+        <div class="clickable-div" id="time-1600">16:00</div>
+        <div class="clickable-div" id="time-1630">16:30</div>
+        <div class="clickable-div" id="time-1700">17:00</div>
+        <div class="clickable-div" id="time-1730">17:30</div>
+        <div class="clickable-div" id="time-1800">18:00</div>
+        <div class="clickable-div" id="time-1830">18:30</div>
+        <div class="clickable-div" id="time-1900">19:00</div>
+        <div class="clickable-div" id="time-1930">19:30</div>
+        <div class="clickable-div" id="time-2000">20:00</div>
+        <div class="clickable-div" id="time-2030">20:30</div>
+        <div class="clickable-div" id="time-2100">21:00</div>
+        <div class="clickable-div" id="time-2130">21:30</div>
+        <div class="clickable-div" id="time-2200">22:00</div>
+        <div class="clickable-div" id="time-2230">22:30</div>
+        <div class="clickable-div" id="time-2300">23:00</div>
+        <div class="clickable-div" id="time-2330">23:30</div>
+    </div>
+
+    <script>
+        const selectedDate = '2024/05/11'; // 存放所選日期的字符串
+        const fromAPI = ['2024/05/11 23:05']; // 從外部獲得的數據
+        let selectedDivs = []; // 存放當前選中的元素
+        const currentTime = dayjs();
+        const apiTimes = fromAPI.map(apiTime => dayjs(apiTime).minute(dayjs(apiTime).minute() >= 30 ? 30 : 0));
+
+        document.querySelectorAll('.clickable-div').forEach(div => {
+            const timeString = div.id.substring(5); // 從 id 中獲取時間字符串
+            const timeValue = dayjs(`${selectedDate} ${timeString}`);
+
+            // 設置點擊事件和初始禁用狀態
+            if (timeValue.isBefore(currentTime) || apiTimes.some(apiTime => apiTime.isSame(timeValue))) {
+                div.classList.add('disabled');
+            } else {
+                div.addEventListener('click', () =>  handleSelection(div, timeValue));
+            }
+        });
+
+        function handleSelection(elem, time) {
+            if (elem.classList.contains('disabled')) {
+                return; // 如果已經禁用，則不進行任何操作
+            }
+
+            // 檢查元素是否已經在選中的數組中
+            if (selectedDivs.includes(elem)) {
+                // 如果點擊的是已選中的元素，則取消選擇
+                elem.classList.remove('active');
+                selectedDivs = selectedDivs.filter(div => div !== elem);
+            } else {
+                // 如果有其他元素已經選中，先取消之前的選擇
+                if (selectedDivs.length > 0) {
+                    selectedDivs[0].classList.remove('active');
+                    selectedDivs = [];
+                }
+                // 選擇新的元素
+                elem.classList.add('active');
+                selectedDivs.push(elem);
+                // 跳轉到下一頁面
+                console.log('ready for next', selectedDivs)
+                // window.location.href = './next-page.html';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
