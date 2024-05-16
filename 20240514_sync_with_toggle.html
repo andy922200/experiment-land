@@ -6,29 +6,33 @@
     <title>Device Sync Example with Toggle Behavior</title>
     <style>
         #module-1 .box {
-            width: 100px;
-            height: 50px;
-            margin: 5px;
-            display: inline-block;
-            background-color: #f0f0f0;
-            text-align: center;
-            line-height: 50px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0 16px;
+            min-height: 48px;
+            border-radius: 8px;
+            margin: 8px;
             border: 1px solid #ccc;
             cursor: pointer;
+            width: calc(50% - 50px);
         }
-        #module-1 .boxContainer {
+        #module-1 .box-container {
             height: 0;
             overflow: hidden;
             transition: height 0.5s ease;
+            display: flex;
+            flex-wrap: wrap;
         }
         #module-1 .disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
         #module-1 .selected {
-            background-color: #4caf50;
+            background-color: #deebf7;
+            border-color: transparent;
         }
-        #module-1 .boxContainer.expanded {
+        #module-1 .box-container.expanded {
             height: 200px;
             overflow-y: auto;
         }
@@ -46,29 +50,33 @@
         }
 
         #module-2 .box {
-            width: 100px;
-            height: 50px;
-            margin: 5px;
-            display: inline-block;
-            background-color: #f0f0f0;
-            text-align: center;
-            line-height: 50px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0 16px;
+            min-height: 48px;
+            border-radius: 8px;
+            margin: 8px;
             border: 1px solid #ccc;
             cursor: pointer;
+            width: calc(50% - 50px);
         }
-        #module-2 .boxContainer {
+        #module-2 .box-container {
             height: 0;
             overflow: hidden;
             transition: height 0.5s ease;
+            display: flex;
+            flex-wrap: wrap;
         }
         #module-2 .disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
         #module-2 .selected {
-            background-color: #4caf50;
+            background-color: #deebf7;
+            border-color: transparent;
         }
-        #module-2 .boxContainer.expanded {
+        #module-2 .box-container.expanded {
             height: 200px;
             overflow-y: auto;
         }
@@ -105,7 +113,7 @@
             </div>
         </div>
         <div id="module-1__savedStatus" class="hidden"></div>
-        <div class="boxContainer">
+        <div class="box-container">
         </div>
     </div>
 
@@ -121,7 +129,7 @@
             </div>
         </div>
         <div id="module-2__savedStatus" class="hidden"></div>
-        <div class="boxContainer">
+        <div class="box-container">
         </div>
     </div>
     
@@ -132,8 +140,8 @@
             selectedPlaces: []
         }
         const moduleSelectorList = [
-            { id: 'module-1', savedKey: 'selectedBoxes', start: 1, end: 20 }, 
-            { id: 'module-2', savedKey: 'selectedPlaces', start: 500, end: 520 }
+            { id: 'module-1', savedKey: 'selectedBoxes'}, 
+            { id: 'module-2', savedKey: 'selectedPlaces'}
         ];
 
         function initModule({ id, savedKey }) {
@@ -141,7 +149,7 @@
             const syncToggle = container.querySelector(`#${id}__syncToggle`);
             const saveButton = container.querySelector(`#${id}__saveButton`);
             const editButton = container.querySelector(`#${id}__editButton`);
-            const boxContainer = container.querySelector(`.boxContainer`);
+            const boxContainer = container.querySelector(`.box-container`);
 
             syncToggle.addEventListener('change', () => {
                 handleToggleChange(syncToggle.checked, { id, savedKey });
@@ -164,7 +172,7 @@
 
                 moduleSelectorList.forEach(otherModule => {
                     if (otherModule.id !== id) {
-                        const otherBoxContainer = document.getElementById(otherModule.id).querySelector('.boxContainer');
+                        const otherBoxContainer = document.getElementById(otherModule.id).querySelector('.box-container');
                         
                         if (otherBoxContainer.classList.contains('expanded')) {
                             triggerExpand(false, {id: otherModule.id, savedKey: otherModule.savedKey});
@@ -185,9 +193,12 @@
 
         function handleSave({ id, savedKey }) {
             const container = document.getElementById(id);
-            const boxContainer = container.querySelector('.boxContainer');
+            const boxContainer = container.querySelector('.box-container');
             const selectedBoxes = boxContainer.querySelectorAll('.box.selected');
-            state[savedKey] = Array.from(selectedBoxes, box => ({ id: parseInt(box.getAttribute('data-id')) }));
+            state[savedKey] = Array.from(selectedBoxes, box => ({ 
+                id: box.getAttribute('data-id'), 
+                name: box.getAttribute('data-name')
+            }));
             if (state[savedKey].length === 0) {
                 container.querySelector('input[type="checkbox"]').checked = false;
             }
@@ -207,7 +218,7 @@
 
                 moduleSelectorList.forEach(otherModule => {
                     if (otherModule.id !== id) {
-                        const otherBoxContainer = document.getElementById(otherModule.id).querySelector('.boxContainer');
+                        const otherBoxContainer = document.getElementById(otherModule.id).querySelector('.box-container');
                         if (otherBoxContainer.classList.contains('expanded')) {
                             triggerExpand(false, {id: otherModule.id, savedKey: otherModule.savedKey });
                             toggleVisibility(`#${otherModule.id}__editButton`, state[otherModule.savedKey].length !== 0);
@@ -230,32 +241,46 @@
                 editButton.textContent = '編輯';
             }
         }
+
+        function parseApiString(apiString) {
+            const parts = apiString.split('&');
+            const total = parseInt(parts[0]);
+            const items = parts.slice(1).map(pair => {
+                const [id, name] = pair.split('=');
+                return { id, name };
+            });
+
+            return {
+                total,
+                items
+            };
+        }
  
-        function createBoxes({ id, start, end }) {
-            const boxContainer = document.getElementById(id).querySelector('.boxContainer');
-            for (let i = start; i <= end; i++) {
+        function createBoxes({ id, data }) {
+            const boxContainer = document.getElementById(id).querySelector('.box-container');
+            const { items, total } = data
+
+            for (let i = 0; i < total; i++) {
                 const box = document.createElement('div');
                 box.className = 'box clickable';
-                box.textContent = `Item ${i}`;
-                box.setAttribute('data-id', i.toString());
+                box.textContent = `${items[i].name}`;
+                box.setAttribute('data-id', items[i].id);
+                box.setAttribute('data-name', items[i].name)
                 boxContainer.appendChild(box);
             }
         }
 
         function applyBoxStates({ id, savedKey }) {
-            const boxContainer = document.getElementById(id).querySelector('.boxContainer');
+            const boxContainer = document.getElementById(id).querySelector('.box-container');
             const boxes = boxContainer.querySelectorAll('.box');
             boxes.forEach(box => {
-                const boxId = parseInt(box.getAttribute('data-id'));
+                const boxId = box.getAttribute('data-id');
                 box.classList.remove('selected', 'disabled', 'clickable');
                 box.classList.add('clickable');
 
                 if (state[savedKey].some(item => item.id === boxId)) {
                     box.classList.add('selected');
-                } else if (boxId % 5 === 0) {
-                    box.classList.add('disabled');
-                    box.onclick = null;
-                } else {
+                }else {
                     box.onclick = toggleBox;
                 }
             });
@@ -277,14 +302,18 @@
                 savedStatus.textContent = "";
             } else {
                 savedStatus.classList.remove('hidden');
-                savedStatus.textContent = `${savedKey}: ${state[savedKey].map(box => box.id).join(', ')}`;
+                savedStatus.textContent = `${savedKey}: ${state[savedKey].map(box => box.name).join(', ')}`;
             }
         }
 
         function triggerExpand(status = true, { id, savedKey }){
             const container = document.getElementById(id);
-            const boxContainer = container.querySelector('.boxContainer');
+            const boxContainer = container.querySelector('.box-container');
             const editButton = container.querySelector(`#${id}__editButton`);
+
+            // Scroll To Top while open
+            boxContainer.scrollTo(0,0)
+            
             if (status) {
                 boxContainer.classList.add('expanded');
                 editButton.textContent = '回復';
@@ -308,9 +337,14 @@
             }
         }
 
+        const apiString = '5&ABC12345XYZ001=Sensor X&ABC12345XYZ002=Sensor Y&ABC12345XYZ003=Sensor Z&DEF67890UVW004=Actuator A&DEF67890UVW005=Actuator B';
+
+        const anotherApiString = '7&12345ABCDE0001=Device A&12345ABCDE0002=Device B&12345ABCDE0003=Device C&12345ABCDE0004=Device D&67890FGHIJ0005=Device E&67890FGHIJ0006=Device F&67890FGHIJ0007=Device G'
+
         moduleSelectorList.forEach((item) => {
+            const data = item.id === 'module-1' ? parseApiString(apiString) : parseApiString(anotherApiString)
             initModule(item);
-            createBoxes(item);
+            createBoxes({...item, data});
             applyBoxStates(item);
         });
     </script>

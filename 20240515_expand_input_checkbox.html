@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Notification</title>
+    <style>
+        #add-mail-notification .input-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        #add-mail-notification .input-container.show {
+            max-height: 100px;
+            transition: max-height 0.5s ease-in;
+        }
+        #add-mail-notification .error {
+            color: red;
+            display: none;
+        }
+        #add-mail-notification .error.show {
+            display: block;
+        }       
+    </style>
+</head>
+
+<body>
+    <div id="add-mail-notification">
+        <label>
+            <input type="checkbox" id="add-mail-notification__checkbox"> 郵件通知
+        </label>
+        <div id="add-mail-notification__input-container" class="input-container">
+            <input type="email" id="add-mail-notification__input" placeholder="請輸入電子郵件">
+            <div class="error">請輸入有效的電子郵件</div>
+        </div>
+    </div>
+
+    <script>
+        function setupCheckboxExpandInput({ containerId }) {
+            if(!containerId ) return;
+            const container = document.getElementById(containerId);
+            const checkbox = container.querySelector('input[type="checkbox"]');
+            const inputContainer = container.querySelector('.input-container');
+            const input = inputContainer.querySelector('input[type="email"]');
+            const error = inputContainer.querySelector('.error');
+
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    inputContainer.classList.add('show');
+                } else {
+                    inputContainer.classList.remove('show');
+                    input.value = '';
+                    error.classList.remove('show');
+                }
+            });
+
+            input.addEventListener('input', function () {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (emailRegex.test(this.value)) {
+                    error.classList.remove('show');
+                } else {
+                    error.classList.add('show');
+                }
+            });
+        }
+
+        setupCheckboxExpandInput({ containerId: 'add-mail-notification' });
+    </script>
+</body>
+
+</html>
